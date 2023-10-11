@@ -1,20 +1,17 @@
-package tr.com.alkimkivanccivi.plugins
+package tr.com.alkimkivanccivi
 
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
-import io.ktor.server.websocket.*
 import io.ktor.websocket.*
-import java.time.Duration
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.exposed.sql.Database
+import java.util.concurrent.atomic.AtomicInteger
 
-fun Application.configureSockets() {
-    install(WebSockets) {
-        pingPeriod = Duration.ofSeconds(15)
-        timeout = Duration.ofSeconds(15)
-        maxFrameSize = Long.MAX_VALUE
-        masking = false
+class Connection(val session: DefaultWebSocketSession, val database: Database) {
+    companion object {
+        val lastId = AtomicInteger(0)
     }
-    routing {
-        webSocket("/ws") { // websocketSession
+
+    suspend fun startListening(){
+        this@Connection.session.apply {
             for (frame in incoming) {
                 if (frame is Frame.Text) {
                     val text = frame.readText()
@@ -26,4 +23,6 @@ fun Application.configureSockets() {
             }
         }
     }
+
+    val name = "user${lastId.getAndIncrement()}"
 }

@@ -2,17 +2,12 @@ package tr.com.alkimkivanccivi.database
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.dao.IntEntity
-import org.jetbrains.exposed.dao.IntEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
-import tr.com.alkimkivanccivi.plugins.ExposedUser
-import tr.com.alkimkivanccivi.plugins.UserService
-import java.util.Date
+
 
 
 object Messages : IntIdTable() {
@@ -82,9 +77,9 @@ class MessageService(private val database: Database) {
         }
     }
 
-    suspend fun readByUsers(senderId: Int, receiverId: Int): List<Message> {
+    suspend fun readByUser(userId: Int): List<Message> {
         return dbQuery {
-            Messages.select { (Messages.senderId eq senderId) and (Messages.receiverId eq receiverId) }
+            Messages.select { (Messages.senderId eq userId) or (Messages.receiverId eq userId) }
                 .map {
                     Message(
                         it[Messages.senderId],
@@ -96,9 +91,9 @@ class MessageService(private val database: Database) {
         }
     }
 
-    suspend fun readNewMessagesByUsers(senderId: Int, receiverId: Int, timestamp: Long): List<Message> {
+    suspend fun readNewMessagesByUser(userId: Int, timestamp: Long): List<Message> {
         return dbQuery {
-            Messages.select { (Messages.createdAt greater timestamp) and (Messages.senderId eq senderId) and (Messages.receiverId eq receiverId) }
+            Messages.select { (Messages.createdAt greater timestamp) and ((Messages.senderId eq userId) or (Messages.receiverId eq userId)) }
                 .map {
                     Message(
                         it[Messages.senderId],
