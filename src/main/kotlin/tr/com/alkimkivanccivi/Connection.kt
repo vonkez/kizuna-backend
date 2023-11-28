@@ -38,7 +38,7 @@ class Connection(
         // Send message to user if user is online
         if (connections.containsKey(targetUid)) {
             val targetConnection = connections[targetUid]
-            targetConnection!!.session.send("MSG " + message)
+            targetConnection!!.session.send("MSG $uid $message")
         }else {
             // TODO: send notifcation
         }

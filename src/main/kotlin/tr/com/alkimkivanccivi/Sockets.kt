@@ -27,10 +27,19 @@ fun Application.configureSockets(messageService: MessageService) {
                     close(CloseReason(CloseReason.Codes.INTERNAL_ERROR,"authentication failed"))
                 }else{
                     val connection = Connection(this, uid, messageService, connections)
-                    connections[uid] = connection
-                    connection.startListening()
+                    try {
+                        println("$uid online")
+                        connections[uid] = connection
+                        connection.startListening()
+                    } catch (e: Exception){
+                        println(e.localizedMessage)
+                    } finally {
+                        println("$uid offline")
+                        connections.remove(uid)
+                    }
+
                 }
-            } else{
+            } else {
                 close(CloseReason(CloseReason.Codes.INTERNAL_ERROR,"authentication failed"))
             }
 

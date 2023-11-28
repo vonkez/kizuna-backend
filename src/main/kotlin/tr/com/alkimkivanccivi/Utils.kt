@@ -9,7 +9,7 @@ import java.lang.IllegalArgumentException
 
 var a = 0
 fun auth(token: String): String? {
-    return a++.toString()
+    // return a++.toString()
     try {
         val decodedToken = FirebaseAuth.getInstance().verifyIdToken(token)
         return decodedToken.uid
