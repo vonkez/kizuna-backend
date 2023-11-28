@@ -9,25 +9,15 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 
 
-
 object Messages : IntIdTable() {
-    val senderId = integer("sender_id")
-    val receiverId = integer("receiver")
+    val senderId = varchar("sender_id", 128)
+    val receiverId = varchar("receiver", 128)
     val messageContent = text("message_content")
     val createdAt = long("created_at")
 }
 
 @Serializable
-data class Message(val senderId: Int, val receiverId: Int, val messageContent: String, val createdAt: Long)
-
-/*
-class Message(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<Message>(Messages)
-    var senderId by Messages.senderId
-    var receiverId     by Messages.receiverId
-    var message by Messages.message
-}
- */
+data class Message(val senderId: String, val receiverId: String, val messageContent: String, val createdAt: Long)
 
 class MessageService(private val database: Database) {
     init {
@@ -77,7 +67,7 @@ class MessageService(private val database: Database) {
         }
     }
 
-    suspend fun readByUser(userId: Int): List<Message> {
+    suspend fun readByUser(userId: String): List<Message> {
         return dbQuery {
             Messages.select { (Messages.senderId eq userId) or (Messages.receiverId eq userId) }
                 .map {
@@ -91,7 +81,7 @@ class MessageService(private val database: Database) {
         }
     }
 
-    suspend fun readNewMessagesByUser(userId: Int, timestamp: Long): List<Message> {
+    suspend fun readNewMessagesByUser(userId: String, timestamp: Long): List<Message> {
         return dbQuery {
             Messages.select { (Messages.createdAt greater timestamp) and ((Messages.senderId eq userId) or (Messages.receiverId eq userId)) }
                 .map {

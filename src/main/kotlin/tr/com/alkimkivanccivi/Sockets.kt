@@ -5,12 +5,11 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import org.jetbrains.exposed.sql.Database
+import tr.com.alkimkivanccivi.database.MessageService
 import java.time.Duration
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.LinkedHashSet
 
-fun Application.configureSockets(database: Database) {
+fun Application.configureSockets(messageService: MessageService) {
     val connections = ConcurrentHashMap<String, Connection>()
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
@@ -27,7 +26,7 @@ fun Application.configureSockets(database: Database) {
                 if (uid === null) {
                     close(CloseReason(CloseReason.Codes.INTERNAL_ERROR,"authentication failed"))
                 }else{
-                    val connection = Connection(this, database)
+                    val connection = Connection(this, uid, messageService, connections)
                     connections[uid] = connection
                     connection.startListening()
                 }

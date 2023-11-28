@@ -12,10 +12,7 @@ import tr.com.alkimkivanccivi.database.MessageService
 import java.lang.IllegalArgumentException
 
 
-fun Application.addRestRoutes(database: Database) {
-
-    val messageService = MessageService(database)
-
+fun Application.addRestRoutes(messageService: MessageService) {
 
     routing {
         get("/readNewMessagesByUser/{timestamp}") {
@@ -31,18 +28,15 @@ fun Application.addRestRoutes(database: Database) {
                 return@get
             }
 
-            try {
-                val decodedToken = FirebaseAuth.getInstance().verifyIdToken(token)
-                val id = decodedToken.uid
-                val messages = messageService.readNewMessagesByUser(id.toInt(),timestamp)
-                call.respond(messages)
-            } catch (e: FirebaseAuthException){
+
+            val id = auth(token)
+            if (id == null)  {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
-            }catch (e: IllegalArgumentException){
-                call.respond(HttpStatusCode.InternalServerError)
-                return@get
             }
+            val messages = messageService.readNewMessagesByUser(id,timestamp)
+            call.respond(messages)
+
         }
     }
 }
