@@ -13,32 +13,44 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.Database
 import tr.com.alkimkivanccivi.database.MessageService
 import java.io.FileInputStream
+import java.util.*
 
 
 fun main() {
     val PORT = System.getenv("PORT")
+
+
+    /*
     val serviceAccount = FileInputStream("service-account-file.json")
+    val options = FirebaseOptions.builder()
+       .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+       .build()
+     */
+
+    val saf = System.getenv("SAF")
+    val decodedString = String(Base64.getDecoder().decode(saf))
 
     val options = FirebaseOptions.builder()
-        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+        .setCredentials(GoogleCredentials.fromStream(decodedString.byteInputStream()))
         .build()
 
     FirebaseApp.initializeApp(options)
 
     embeddedServer(Netty, port = PORT.toInt(), host = "0.0.0.0", module = Application::module)
-            .start(wait = true)
+        .start(wait = true)
 
 }
 
 fun Application.module() {
-
     val DB_URL = System.getenv("DB_URL")
     val DB_USERNAME = System.getenv("DB_USERNAME")
     val DB_PASSWORD = System.getenv("DB_PASSWORD")
 
     // val database = Database.connect( "jdbc:sqlite:./data.db", "org.sqlite.JDBC" )
-    val database = Database.connect(DB_URL, driver = "org.postgresql.Driver",
-        user = DB_USERNAME, password = DB_PASSWORD)
+    val database = Database.connect(
+        DB_URL, driver = "org.postgresql.Driver",
+        user = DB_USERNAME, password = DB_PASSWORD
+    )
 
     val messageService = MessageService(database)
     install(ContentNegotiation) {
