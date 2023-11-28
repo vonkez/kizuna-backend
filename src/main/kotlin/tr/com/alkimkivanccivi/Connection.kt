@@ -31,7 +31,11 @@ class Connection(
 
     suspend fun message(text: String) {
         val (_, targetUid, message) = text.split(" ", limit = 3)
+
+        // Add message to database
         messageService.create(Message(uid, targetUid, message, Date().time))
+
+        // Send message to user if user is online
         if (connections.containsKey(targetUid)) {
             val targetConnection = connections[targetUid]
             targetConnection!!.session.send("MSG " + message)
