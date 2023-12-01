@@ -39,11 +39,11 @@ fun Application.addRestRoutes(messageService: MessageService) {
             val messages = messageService.readNewMessagesByUser(id,timestamp)
             val userIds = messages.map { if (it.receiverId == id) it.senderId else it.receiverId  }.toSet()
             val users =userIds.map {
-                val userRecord = FirebaseAuth.getInstance().getUser(id)
+                val userRecord = FirebaseAuth.getInstance().getUser(it)
                 if (userRecord.displayName == null){
-                    return@map id to userRecord.email!!
+                    return@map it to userRecord.email!!
                 } else {
-                    return@map id to userRecord.displayName
+                    return@map it to userRecord.displayName
                 }
             }.toMap()
             val result = NewMessagesResult(messages, users)
