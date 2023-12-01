@@ -50,5 +50,32 @@ fun Application.addRestRoutes(messageService: MessageService) {
             call.respond(result)
 
         }
+
+        get("/displayName/{uid}") {
+            val uid = call.parameters["uid"]
+            if (uid == null){
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+
+            val token = call.request.header("Authorization")
+            println("token: $token")
+            if (token.isNullOrBlank()){
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+
+            val id = auth(token)
+            if (id == null)  {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+            val userRecord = FirebaseAuth.getInstance().getUser(id)
+            if (userRecord.displayName == null){
+                call.respond(userRecord.email!!)
+            } else {
+                call.respond(userRecord.displayName)
+            }
+        }
     }
 }
