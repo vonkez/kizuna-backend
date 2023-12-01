@@ -21,7 +21,6 @@ class Connection(
                     val text = frame.readText()
                     when {
                         text.startsWith("MSG") -> message(text)
-                        text.startsWith("ECHO") -> echo(text, outgoing)
                         text.startsWith("BYE") -> close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
                     }
                 }
@@ -44,8 +43,5 @@ class Connection(
         }
     }
 
-    suspend fun echo(text: String, outgoing: SendChannel<Frame>) {
-        outgoing.send(Frame.Text("YOU SAID: ${text.split(" ")[1]}"))
-    }
 
 }

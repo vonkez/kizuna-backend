@@ -70,7 +70,7 @@ fun Application.addRestRoutes(messageService: MessageService) {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
             }
-            val userRecord = FirebaseAuth.getInstance().getUser(id)
+            val userRecord = FirebaseAuth.getInstance().getUser(uid)
             if (userRecord.displayName == null){
                 call.respond(userRecord.email!!)
             } else {
